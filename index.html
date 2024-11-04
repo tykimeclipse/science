@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cell Color and Name Toggle</title>
+  <style>
+    /* 화면 전체 크기 설정 */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: hidden;
+    }
+    /* 표 스타일 */
+    table {
+      width: 100vw;         /* 뷰포트 전체 너비 */
+      height: calc(100vh - 80px); /* 버튼 위쪽까지 채우기 */
+      border-collapse: collapse;
+    }
+    td {
+      border: 1px solid #333;
+      width: 12.5%;         /* 가로 8칸 */
+      height: 25%;          /* 세로 4칸 */
+      text-align: center;   /* 셀 안의 텍스트 가운데 정렬 */
+      vertical-align: middle; /* 세로 가운데 정렬 */
+      font-size: 90px;      /* 텍스트 크기 설정 (더 크게) */
+    }
+    /* 버튼 스타일 및 위치 */
+    .button-container {
+      margin: 10px;
+      display: flex;
+      justify-content: center; /* 버튼을 수평으로 나열 */
+    }
+    button {
+      margin: 0 10px; /* 버튼 간의 간격 설정 */
+      padding: 10px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <table id="colorTable">
+    <!-- 4x8 표, 셀 내용은 처음에 모두 비어 있음 -->
+    <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+  </table>
+  <div class="button-container">
+    <button onclick="changeSingleRandomCellColor()">랜덤 플레이</button>
+    <button onclick="toggleCellName()">원소기호</button>
+  </div>
+
+  <script>
+    let previousCell = null; // 이전에 색상이 변경된 셀을 기억하는 변수
+    let cellNames = [
+      ['H', '', '', '', '', '', '', 'He'],  // 1행
+      ['Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne'], // 2행
+      ['Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar'], // 3행
+      ['K', 'Ca', '', '', '', '', '', '']   // 4행
+    ];
+    let currentCellName = ''; // 현재 셀 이름 저장 변수
+
+    function getFixedColor() {
+      return '#00ff00'; // 초록색
+    }
+
+    function changeSingleRandomCellColor() {
+      const table = document.getElementById('colorTable');
+      const cells = Array.from(table.getElementsByTagName('td'));
+
+      // 색상 변화에서 제외할 셀 인덱스
+      const excludedIndices = cells.map((_, index) => {
+        const row = Math.floor(index / 8);
+        const col = index % 8;
+
+        // 첫 줄의 두 번째부터 일곱 번째 셀과 네 번째 줄의 세 번째부터 여덟 번째 셀 제외
+        if ((row === 0 && col >= 1 && col <= 6) || (row === 3 && col >= 2 && col <= 7)) {
+          return index;
+        }
+        return -1;
+      }).filter(index => index !== -1);
+
+      // 제외할 셀을 뺀 나머지 셀 인덱스만 포함한 배열 생성
+      const validIndices = cells.map((_, index) => index).filter(index => !excludedIndices.includes(index));
+
+      // 랜덤 인덱스 선택
+      const randomIndex = validIndices[Math.floor(Math.random() * validIndices.length)];
+
+      // 이전 셀 색상 초기화
+      if (previousCell) {
+        previousCell.style.backgroundColor = '';
+        previousCell.textContent = ''; // 이전 셀의 이름 초기화
+      }
+
+      // 새로운 셀 색상 변경
+      previousCell = cells[randomIndex];
+      previousCell.style.backgroundColor = getFixedColor();
+      
+      // 현재 셀의 이름 저장
+      const rowIndex = Math.floor(randomIndex / 8);
+      const colIndex = randomIndex % 8;
+      currentCellName = cellNames[rowIndex][colIndex]; // 현재 선택된 셀의 이름 저장
+    }
+
+    // 셀 이름 토글
+    function toggleCellName() {
+      if (previousCell) {
+        if (previousCell.textContent === currentCellName) {
+          previousCell.textContent = ''; // 이름 지우기
+        } else {
+          previousCell.textContent = currentCellName; // 이름 추가
+        }
+      }
+    }
+  </script>
+</body>
+</html>
